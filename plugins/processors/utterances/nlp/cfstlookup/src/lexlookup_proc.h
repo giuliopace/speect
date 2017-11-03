@@ -28,34 +28,34 @@
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* A LexLookup utterance processor.                                                 */
+/* A cfstLookup utterance processor.                                                 */
 /*                                                                                  */
 /*                                                                                  */
 /************************************************************************************/
 
-#ifndef _SPCT_PLUGIN_UTTPROCESSOR_LEXLOOKUP_H__
-#define _SPCT_PLUGIN_UTTPROCESSOR_LEXLOOKUP_H__
+#ifndef _SPCT_PLUGIN_UTTPROCESSOR_CFSTLOOKUP_H__
+#define _SPCT_PLUGIN_UTTPROCESSOR_CFSTLOOKUP_H__
 
 
 /**
  * @file tokenizer_proc.h
- * A LexLookup utterance processor.
+ * A cfstLookup utterance processor.
  */
 
 
 /**
  * @ingroup SUttProc
- * @defgroup SUttProcLexLookup LexLookup
- * A LexLookup utterance processor.
+ * @defgroup SUttProccfstLookup cfstLookup
+ * A cfstLookup utterance processor.
  *
  * Depends on the @e tokenizer plug-in.
  * Features that can be set for the processor:
  * <ul> <li> A "tokenizer symbols" #SMap with the following entries:
  *  <ul>
- *      <li> "whitespace" : white-space symbols used in lexlookup. </li>
- *      <li> "single-char" : single-character symbols used in lexlookup. </li>
- *      <li> "pre-punctuation" : pre-punctuation symbols used in lexlookup. </li>
- *      <li> "post-punctuation" : post-punctuation symbols used in lexlookup. </li>
+ *      <li> "whitespace" : white-space symbols used in cfstlookup. </li>
+ *      <li> "single-char" : single-character symbols used in cfstlookup. </li>
+ *      <li> "pre-punctuation" : pre-punctuation symbols used in cfstlookup. </li>
+ *      <li> "post-punctuation" : post-punctuation symbols used in cfstlookup. </li>
  *  </ul>
  *   </li> </ul>
  *
@@ -66,11 +66,11 @@
  * Item features that are set:
  * <ul>
  * <li> @c whitespace : white-space symbols extracted from
- * lexlookup </li>
+ * cfstlookup </li>
  * <li> @c prepunc : pre-punctuation symbols extracted from
- * lexlookup </li>
+ * cfstlookup </li>
  * <li> @c postpunc : post-punctuation symbols extracted from
- * lexlookup </li>
+ * cfstlookup </li>
  * </ul>
  *
  * If this processor fails then it will delete the relation and all
@@ -103,17 +103,17 @@ S_BEGIN_C_DECLS
 /************************************************************************************/
 
 /**
- * Typedef of the LexLookup utterance processor. Does not add any
+ * Typedef of the cfstLookup utterance processor. Does not add any
  * new members, therefore exactly the same as #SUttProcessor.
  */
-typedef SUttProcessor SLexLookupUttProc;
+typedef SUttProcessor ScfstLookupUttProc;
 
 
 /**
- * Typedef of the lexlookup utterance processor class. Does not add any
+ * Typedef of the cfstlookup utterance processor class. Does not add any
  * new methods, therefore exactly the same as #SUttProcessor.
  */
-typedef SUttProcessorClass SLexLookupUttProcClass;
+typedef SUttProcessorClass ScfstLookupUttProcClass;
 
 
 /************************************************************************************/
@@ -123,23 +123,23 @@ typedef SUttProcessorClass SLexLookupUttProcClass;
 /************************************************************************************/
 
 /**
- * Register the #SLexLookupUttProc plug-in class with the Speect Engine
+ * Register the #ScfstLookupUttProc plug-in class with the Speect Engine
  * object system.
  * @private
  *
  * @param error Error code.
  */
-S_LOCAL void _s_lexlookup_utt_proc_class_reg(s_erc *error);
+S_LOCAL void _s_cfstlookup_utt_proc_class_reg(s_erc *error);
 
 
 /**
- * Free the #SLexLookupUttProc plug-in class from the Speect Engine
+ * Free the #ScfstLookupUttProc plug-in class from the Speect Engine
  * object system.
  * @private
  *
  * @param error Error code.
  */
-S_LOCAL void _s_lexlookup_utt_proc_class_free(s_erc *error);
+S_LOCAL void _s_cfstlookup_utt_proc_class_free(s_erc *error);
 
 
 /************************************************************************************/
@@ -155,4 +155,4 @@ S_END_C_DECLS
  * end documentation
  */
 
-#endif /* _SPCT_PLUGIN_UTTPROCESSOR_LEXLOOKUP_H__ */
+#endif /* _SPCT_PLUGIN_UTTPROCESSOR_CFSTLOOKUP_H__ */
