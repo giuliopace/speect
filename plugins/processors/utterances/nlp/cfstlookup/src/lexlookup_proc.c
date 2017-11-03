@@ -29,7 +29,7 @@
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* A LexLookup utterance processor.                                                 */
+/* A cfstLookup utterance processor.                                                 */
 /*                                                                                  */
 /*                                                                                  */
 /************************************************************************************/
@@ -48,6 +48,7 @@
 #include "lexlookup_proc.h"
 #include "hrg/processors/featprocessor.h"
 #include "phoneset.h"
+#include "cfstlookup/cfstlookup.h"
 
 /************************************************************************************/
 /*                                                                                  */
@@ -55,7 +56,7 @@
 /*                                                                                  */
 /************************************************************************************/
 
-static SLexLookupUttProcClass LexLookupUttProcClass; /* SLexLookupUttProc class declaration. */
+static ScfstLookupUttProcClass cfstLookupUttProcClass; /* ScfstLookupUttProc class declaration. */
 
 
 /************************************************************************************/
@@ -76,23 +77,23 @@ static void s_get_lexical_objects(const SUttProcessor *self, SUtterance *utt,
 /************************************************************************************/
 
 /* local functions to register and free classes */
-S_LOCAL void _s_lexlookup_utt_proc_class_reg(s_erc *error)
+S_LOCAL void _s_cfstlookup_utt_proc_class_reg(s_erc *error)
 {
 	S_CLR_ERR(error);
-	s_class_reg(S_OBJECTCLASS(&LexLookupUttProcClass), error);
+	s_class_reg(S_OBJECTCLASS(&cfstLookupUttProcClass), error);
 	S_CHK_ERR(error, S_CONTERR,
-			  "_s_lexlookup_utt_proc_class_reg",
-			  "Failed to register SLexLookupUttProcClass");
+			  "_s_cfstlookup_utt_proc_class_reg",
+			  "Failed to register ScfstLookupUttProcClass");
 }
 
 
-S_LOCAL void _s_lexlookup_utt_proc_class_free(s_erc *error)
+S_LOCAL void _s_cfstlookup_utt_proc_class_free(s_erc *error)
 {
 	S_CLR_ERR(error);
-	s_class_free(S_OBJECTCLASS(&LexLookupUttProcClass), error);
+	s_class_free(S_OBJECTCLASS(&cfstLookupUttProcClass), error);
 	S_CHK_ERR(error, S_CONTERR,
-			  "_s_lexlookup_utt_proc_class_free",
-			  "Failed to free SLexLookupUttProcClass");
+			  "_s_cfstlookup_utt_proc_class_free",
+			  "Failed to free ScfstLookupUttProcClass");
 }
 
 
@@ -457,7 +458,6 @@ static void Initialize(SUttProcessor *self, const SVoice *voice, s_erc *error)
 	SFeatProcessor *stressProc;
 	SSyllabification *syllab;
 
-
 	S_CLR_ERR(error);
 
 	/* check if a syllabification function is defined as a feature,
@@ -603,7 +603,7 @@ static void Initialize(SUttProcessor *self, const SVoice *voice, s_erc *error)
 
 	S_UNUSED(voice);
 }
-
+#include "stdio.h"
 
 static void Run(const SUttProcessor *self, SUtterance *utt,
 				s_erc *error)
@@ -632,6 +632,9 @@ static void Run(const SUttProcessor *self, SUtterance *utt,
 	s_bool is_present;
 
 
+
+
+	fprintf(stderr, "%s\n", "PROVA");
 	S_CLR_ERR(error);
 	s_get_lexical_objects(self, utt, &g2p, &lexicon, &addendum, &syllab, error);
 	if (S_CHK_ERR(error, S_CONTERR,
@@ -893,7 +896,6 @@ continue_cycle:
 					  "Call to \"SUttProcessorGetFeature\" failed"))
 			goto quit_error;
 
-
 		s_compute_stresses(featproc, wordItem, error);
 		if (S_CHK_ERR(error, S_CONTERR,
 					  "Run",
@@ -955,16 +957,16 @@ quit_error:
 
 /************************************************************************************/
 /*                                                                                  */
-/* SLexLookupUttProc class initialization                                           */
+/* ScfstLookupUttProc class initialization                                           */
 /*                                                                                  */
 /************************************************************************************/
 
-static SLexLookupUttProcClass LexLookupUttProcClass =
+static ScfstLookupUttProcClass cfstLookupUttProcClass =
 {
 	/* SObjectClass */
 	{
-		"SUttProcessor:SLexLookupUttProc",
-		sizeof(SLexLookupUttProc),
+		"SUttProcessor:ScfstLookupUttProc",
+		sizeof(ScfstLookupUttProc),
 		{ 0, 1},
 		NULL,            /* init    */
 		Destroy,         /* destroy */
