@@ -14,7 +14,6 @@
 #                        Plug-in directories                                         #
 #------------------------------------------------------------------------------------#
 
-add_subdirectory(cfstlookup)
 add_subdirectory(tokenizer)
 add_subdirectory(normalizer)
 add_subdirectory(phrasify)
