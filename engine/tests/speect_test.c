@@ -290,6 +290,22 @@ int main(int argc, char **argv) {
 			goto quit;
 		}
 
+		/*fprintf(stderr, "%s\n", "PROVA");
+		SRelation* tokenrel = SUtteranceGetRelation(utt, "SylStructure", &error);
+		SItem * head = SRelationHead(tokenrel, &error);
+		const char * b = SItemGetName(head, &error);
+		fprintf(stderr, "%s\n", b);
+
+
+		fprintf(stderr, "%s\n", "STAMPO BOUNDARY");
+		SRelation* boundrel = SUtteranceGetRelation(utt, "Boundaries", &error);
+		SItem * curr = SRelationHead(boundrel, &error);
+		while(curr != NULL){
+			const char * c = SItemGetName(curr, &error);
+			fprintf(stderr, "current item in boundary: %s\n", c);
+			curr = SItemNext(curr, &error);
+		}
+*/
 		S_FREE(htslabels_file);
 
 		SPCT_PRINT_AND_WAIT("saved htslabels, press ENTER\n");
