@@ -1,18 +1,30 @@
 ######################################################################################
 ##                                                                                  ##
 ## AUTHOR  : Aby Louw                                                               ##
-## DATE    : 11 June 2010                                                           ##
+## DATE    : 5 November 2009                                                        ##
 ##                                                                                  ##
 ######################################################################################
 ##                                                                                  ##
-## CMakeList for lexicon serialization plug-ins                                     ##
+## Source files for Lexicon JSON formatter plug-in                                  ##
 ##                                                                                  ##
 ##                                                                                  ##
 ######################################################################################
 
-#------------------------------------------------------------------------------------#
-#                        Plug-in directories                                         #
-#------------------------------------------------------------------------------------#
 
-add_subdirectory(cfstlookup)
-#add_subdirectory(json)
+######## source files ##################
+
+speect_plugin_sources(
+  src/plugin.c
+  src/lexicon_maryttsfst.c
+  src/serialized_lex.c
+  src/read.c
+  )
+
+
+######## header files ##################
+
+speect_plugin_headers(
+  src/lexicon_maryttsfst.h
+  src/serialized_lex.h
+  )
+

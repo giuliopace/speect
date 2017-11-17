@@ -1,0 +1,9 @@
+before_script:
+  - apt-get update && apt-get install -y cmake
+
+mainsystem:
+  script:
+    - mkdir -p build && cd build && cmake .. -DCMAKE_INSTALL_PREFIX=install
+    - make -j
+    - make -j test || ( cat Testing/*/*.* && exit 33 )
+    - make install && find install

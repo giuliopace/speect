@@ -1,18 +1,20 @@
 ######################################################################################
 ##                                                                                  ##
 ## AUTHOR  : Aby Louw                                                               ##
-## DATE    : 11 June 2010                                                           ##
+## DATE    : June 2010                                                              ##
 ##                                                                                  ##
 ######################################################################################
 ##                                                                                  ##
-## CMakeList for lexicon serialization plug-ins                                     ##
+## CMakeList for JSON Lexicon examples                                              ##
 ##                                                                                  ##
 ##                                                                                  ##
 ######################################################################################
 
-#------------------------------------------------------------------------------------#
-#                        Plug-in directories                                         #
-#------------------------------------------------------------------------------------#
+speect_example(load_lexicon)
 
-add_subdirectory(cfstlookup)
-#add_subdirectory(json)
+if(NOT "${CMAKE_SPEECT_SOURCE_DIR}" STREQUAL "${CMAKE_SPEECT_BINARY_DIR}")
+  speect_file_copy(${CMAKE_CURRENT_SOURCE_DIR}/lexicon_example.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/)
+endif(NOT "${CMAKE_SPEECT_SOURCE_DIR}" STREQUAL "${CMAKE_SPEECT_BINARY_DIR}")
+
+
