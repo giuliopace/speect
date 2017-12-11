@@ -28,7 +28,7 @@
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* JSON reader for SLexicon files.                                                  */
+/* MaryTTS FST reader for SLexicon files.                                           */
 /*                                                                                  */
 /*                                                                                  */
 /************************************************************************************/
@@ -153,7 +153,7 @@ static void plugin_register_function(s_erc *error)
 	_s_serialized_maryttsfst_lexicon_reg(error);
 	if (S_CHK_ERR(error, S_CONTERR,
 				  SPCT_PLUGIN_REG_STR,
-				  "Failed to register SmaryttsfstLexiconFile class"))
+				  "Failed to register SMaryttsFSTLexiconFile class"))
 	{
 		s_erc local_err = S_SUCCESS;
 
@@ -177,7 +177,7 @@ static void plugin_exit_function(s_erc *error)
 	_s_serialized_maryttsfst_lexicon_free(&local_err);
 	S_CHK_ERR(&local_err, S_CONTERR,
 			  SPCT_PLUGIN_EXIT_STR,
-			  "Failed to free SmaryttsfstLexiconFile class");
+			  "Failed to free SMaryttsFSTLexiconFile class");
 
 	_s_lexicon_maryttsfst_class_free(error);
 	S_CHK_ERR(error, S_CONTERR,

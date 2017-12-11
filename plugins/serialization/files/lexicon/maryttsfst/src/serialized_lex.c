@@ -28,8 +28,8 @@
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* SSerializedFile implementation for JSON format lexicons.                         */
-/* Read lexicons from JSON formatted files.                                         */
+/* SSerializedFile implementation for MaryTTS FST format lexicons.                  */
+/* Read lexicons from MaryTTS FST formatted files.                                  */
 /*                                                                                  */
 /************************************************************************************/
 
@@ -49,9 +49,9 @@
 /*                                                                                  */
 /************************************************************************************/
 
-typedef SSerializedFile SmaryttsfstLexiconFile;
+typedef SSerializedFile SMaryttsFSTLexiconFile;
 
-typedef SSerializedFileClass SmaryttsfstLexiconFileClass;
+typedef SSerializedFileClass SMaryttsFSTLexiconFileClass;
 
 
 /************************************************************************************/
@@ -60,7 +60,7 @@ typedef SSerializedFileClass SmaryttsfstLexiconFileClass;
 /*                                                                                  */
 /************************************************************************************/
 
-static SmaryttsfstLexiconFileClass maryttsfstLexiconFileClass; /* SmaryttsfstLexiconFile class declaration. */
+static SMaryttsFSTLexiconFileClass MaryttsFSTLexiconFileClass; /* SJSONLexiconFile class declaration. */
 
 
 /************************************************************************************/
@@ -74,21 +74,21 @@ static SmaryttsfstLexiconFileClass maryttsfstLexiconFileClass; /* SmaryttsfstLex
 S_LOCAL void _s_serialized_maryttsfst_lexicon_reg(s_erc *error)
 {
 	S_CLR_ERR(error);
-	s_class_reg(S_OBJECTCLASS(&maryttsfstLexiconFileClass), error);
+	s_class_reg(S_OBJECTCLASS(&MaryttsFSTLexiconFileClass), error);
 	if (S_CHK_ERR(error, S_CONTERR,
 				  "_s_serialized_maryttsfst_lexicon_reg",
-				  "Failed to register SmaryttsfstLexiconFileClass"))
+				  "Failed to register SMaryttsFSTLexiconFileClass"))
 		return;
 
-	SSerializedFileRegister(&maryttsfstLexiconFileClass, error);
+	SSerializedFileRegister(&MaryttsFSTLexiconFileClass, error);
 	if (S_CHK_ERR(error, S_CONTERR,
 				  "_s_serialized_maryttsfst_lexicon_reg",
-				  "Failed to add serialized file class SmaryttsfstLexiconFileClass"))
+				  "Failed to add serialized file class SMaryttsfstLexiconFileClass"))
 	{
 		s_erc local_err = S_SUCCESS;
 
 
-		s_class_free(S_OBJECTCLASS(&maryttsfstLexiconFileClass), &local_err);
+		s_class_free(S_OBJECTCLASS(&MaryttsFSTLexiconFileClass), &local_err);
 		return;
 	}
 }
@@ -102,15 +102,15 @@ S_LOCAL void _s_serialized_maryttsfst_lexicon_free(s_erc *error)
 	S_CLR_ERR(&local_err);
 	S_CLR_ERR(error);
 
-	SSerializedFileFree(&maryttsfstLexiconFileClass, &local_err);
+	SSerializedFileFree(&MaryttsFSTLexiconFileClass, &local_err);
 	S_CHK_ERR(&local_err, S_CONTERR,
 			  "_s_serialized_maryttsfst_lexicon_free",
-			  "Failed to remove serialized file class SmaryttsfstLexiconFileClass");
+			  "Failed to remove serialized file class SMaryttsFSTLexiconFileClass");
 
-	s_class_free(S_OBJECTCLASS(&maryttsfstLexiconFileClass), error);
+	s_class_free(S_OBJECTCLASS(&MaryttsFSTLexiconFileClass), error);
 	S_CHK_ERR(error, S_CONTERR,
 			  "_s_serialized_maryttsfst_lexicon_free",
-			  "Failed to free SmaryttsfstLexiconFileClass");
+			  "Failed to free SMaryttsFSTLexiconFileClass");
 
 	if ((local_err != S_SUCCESS)
 		&& (error != NULL)
@@ -134,7 +134,7 @@ static void Dispose(void *obj, s_erc *error)
 
 static SObject *Load(const char *path, s_erc *error)
 {
-	SLexiconmaryttsfst *lex;
+	SLexiconMaryttsFST *lex;
 
 
 	S_CLR_ERR(error);
@@ -161,16 +161,16 @@ static void Save(const SObject *object, const char *path, s_erc *error)
 
 /************************************************************************************/
 /*                                                                                  */
-/* SmaryttsfstLexiconFile class initialization                                            */
+/* SMaryttsFSTLexiconFile class initialization                                      */
 /*                                                                                  */
 /************************************************************************************/
 
-static SmaryttsfstLexiconFileClass maryttsfstLexiconFileClass =
+static SMaryttsFSTLexiconFileClass MaryttsFSTLexiconFileClass =
 {
 	/* SObjectClass */
 	{
-		"SSerializedFile:SmaryttsfstLexiconFile",
-		sizeof(SmaryttsfstLexiconFile),
+		"SSerializedFile:SMaryttsFSTLexiconFile",
+		sizeof(SMaryttsFSTLexiconFile),
 		{ 0, 1},
 		NULL,                  /* init    */
 		NULL,                  /* destroy */
@@ -182,5 +182,7 @@ static SmaryttsfstLexiconFileClass maryttsfstLexiconFileClass =
 	/* SSerializedFileClass */
 	"spct_lexicon",            /* format  */
 	Load,                      /* load    */
-	Save                       /* save    */
+	Save,                      /* save    */
+	NULL                       /* save_to_datasource */
+
 };

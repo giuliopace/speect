@@ -29,7 +29,7 @@
 /************************************************************************************/
 /*                                                                                  */
 /* A lexicon class implementation with the lexicon entries in a SMap                */
-/* structure read from a JSON format file. Inherits from SLexicon.                  */
+/* structure read from a MaryTTS FST format file. Inherits from SLexicon.           */
 /*                                                                                  */
 /*                                                                                  */
 /************************************************************************************/
@@ -41,15 +41,15 @@
 /**
  * @file lexicon_maryttsfst.h
  * A lexicon class implementation with the lexicon entries in a SMap
- * structure read from a JSON format file.
+ * structure read from a MaryTTS FST format file.
  */
 
 
 /**
  * @ingroup SLexicon
- * @defgroup SLexiconmaryttsfst JSON Lexicon
+ * @defgroup SLexiconMaryttsFST MaryTTS FST Lexicon
  * A lexicon class implementation with the lexicon entries in a SMap
- * structure read from a JSON format file. Inherits from SLexicon.
+ * structure read from a MaryTTS FST format file. Inherits from SLexicon.
  * @{
  */
 
@@ -80,25 +80,25 @@ S_BEGIN_C_DECLS
 
 /**
  * @hideinitializer
- * Return the given #SLexiconmaryttsfst child/parent class object as a
- * #SLexiconmaryttsfst object.
+ * Return the given #SLexiconMaryttsFST child/parent class object as a
+ * #SLexiconMaryttsFST object.
  *
  * @param SELF The given object.
  *
- * @return Given object as #SLexiconmaryttsfst* type.
+ * @return Given object as #SLexiconMaryttsFST* type.
  * @note This casting is not safety checked.
  */
-#define S_LEXICON_MARYTTSFST(SELF)    ((SLexiconmaryttsfst *)(SELF))
+#define S_LEXICON_MARYTTSFST(SELF)    ((SLexiconMaryttsFST *)(SELF))
 
 
 /************************************************************************************/
 /*                                                                                  */
-/* SLexiconmaryttsfst definition                                                          */
+/* SLexiconMaryttsFST definition                                                    */
 /*                                                                                  */
 /************************************************************************************/
 
 /**
- * The SLexiconmaryttsfst structure.
+ * The SLexiconMaryttsFST structure.
  * @extends SLexicon
  */
 typedef struct
@@ -109,23 +109,23 @@ typedef struct
 	SLexicon      obj;
 
 	/**
-	 * @protected Lexicon entries.
+	 * @protected Lexicon data.
 	 */
-	SMap         *entries;
-} SLexiconmaryttsfst;
+	void         *dictionary;
+} SLexiconMaryttsFST;
 
 
 /************************************************************************************/
 /*                                                                                  */
-/* SLexiconmaryttsfstClass definition                                                     */
+/* SLexiconMaryttsFSTClass definition                                               */
 /*                                                                                  */
 /************************************************************************************/
 
 /**
- * Definition of the SLexiconmaryttsfst class. This class adds no class methods to the
+ * Definition of the SLexiconMaryttsFST class. This class adds no class methods to the
  * #SLexiconClass and is therefore exactly the same.
  */
-typedef SLexiconClass SLexiconmaryttsfstClass;
+typedef SLexiconClass SLexiconMaryttsFSTClass;
 
 
 /************************************************************************************/
@@ -135,7 +135,7 @@ typedef SLexiconClass SLexiconmaryttsfstClass;
 /************************************************************************************/
 
 /**
- * Register the #SLexiconmaryttsfst plug-in class with the Speect Engine object
+ * Register the #SLexiconMaryttsFST plug-in class with the Speect Engine object
  * system.
  * @private
  *
@@ -144,7 +144,7 @@ typedef SLexiconClass SLexiconmaryttsfstClass;
 S_LOCAL void _s_lexicon_maryttsfst_class_reg(s_erc *error);
 
 /**
- * Free the #SLexiconmaryttsfst plug-in class from the Speect Engine object
+ * Free the #SLexiconMaryttsFST plug-in class from the Speect Engine object
  * system.
  * @private
  *

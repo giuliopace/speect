@@ -453,9 +453,9 @@ static SList *GetWord(const SLexicon *self, const char *word,
 	SList *listCopy;
 	const SObject *wordEntries;
 	const SLexiconJSON *lex = S_LEXICON_JSON(self);
+S_CLR_ERR
 
-
-	S_CLR_ERR(error);
+	(error);
 	if (word == NULL)
 	{
 		S_CTX_ERR(error, S_ARGERROR,

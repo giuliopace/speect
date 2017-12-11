@@ -28,8 +28,8 @@
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* SSerializedFile implementation for JSON format lexicons.                         */
-/* Read lexicons from JSON formatted files.                                         */
+/* SSerializedFile implementation for MaryTTS FST format lexicons.                  */
+/* Read lexicons from MaryTTS FST formatted files.                                  */
 /*                                                                                  */
 /************************************************************************************/
 
@@ -39,14 +39,14 @@
 
 /**
  * @file serialized_lex.h
- * SSerializedFile implementation for JSON format lexicons.
+ * SSerializedFile implementation for MaryTTS FST format lexicons.
  */
 
 
 /**
  * @ingroup SSerializedFile
- * @defgroup SJSONLexicon Serialized JSON Lexicon
- * SSerializedFile implementation for JSON format lexicons.
+ * @defgroup SMaryttsFSTLexicon Serialized MaryTTS FST Lexicon
+ * SSerializedFile implementation for MaryTTS FST format lexicons.
  * @{
  */
 
@@ -96,15 +96,15 @@ S_LOCAL void _s_serialized_maryttsfst_lexicon_free(s_erc *error);
 
 
 /**
- * Read an JSON format lexicon from the given file.
+ * Read an MaryTTS FST format lexicon from the given file.
  *
- * @param path The full path and file name of the JSON format lexicon
+ * @param path The full path and file name of the MaryTTS FST format lexicon
  * to read.
  * @param error Error code.
  *
  * @return Loaded lexicon or @c NULL on error.
  */
-S_LOCAL SLexiconmaryttsfst *s_read_lexicon_maryttsfst(const char *path, s_erc *error);
+S_LOCAL SLexiconMaryttsFST *s_read_lexicon_maryttsfst(const char *path, s_erc *error);
 
 
 /************************************************************************************/

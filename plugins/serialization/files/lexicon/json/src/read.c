@@ -50,7 +50,7 @@
 /************************************************************************************/
 
 static void set_lex_info(SLexicon *lex, const SMap *lexDef, s_erc *error);
-
+S_LOCAL SLexiconJSON *s_read_lexicon_json(const char *path, s_erc *error);
 
 /************************************************************************************/
 /*                                                                                  */

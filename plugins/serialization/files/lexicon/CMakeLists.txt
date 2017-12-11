@@ -14,5 +14,5 @@
 #                        Plug-in directories                                         #
 #------------------------------------------------------------------------------------#
 
-add_subdirectory(cfstlookup)
-#add_subdirectory(json)
+add_subdirectory(json)
+add_subdirectory(maryttsfst)

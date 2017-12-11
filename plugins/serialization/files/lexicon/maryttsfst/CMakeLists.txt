@@ -5,23 +5,25 @@
 ##                                                                                  ##
 ######################################################################################
 ##                                                                                  ##
-## CMakeList for SLexicon maryttsfst Plug-in                                              ##
+## CMakeList for SLexicon MaryTTS FST Plug-in                                       ##
 ##                                                                                  ##
 ##                                                                                  ##
 ######################################################################################
+
+find_package(cfstlookup REQUIRED)
 
 #------------------------------------------------------------------------------------#
 #                             Define plug-in                                         #
 #------------------------------------------------------------------------------------#
 
-speect_plugin_definition(Lexicon_maryttsfst "SLexiconmaryttsfst" 1 0 0)
+speect_plugin_definition(Lexicon_MaryttsFST "SLexiconMaryttsFST" 1 0 0)
 
 
 #------------------------------------------------------------------------------------#
 #                        Configure plugin_info.h.in                                  #
 #------------------------------------------------------------------------------------#
 
-set(description "Load SLexicon type data in fst format from files")
+set(description "Load SLexicon type data in MaryTTS FST format from files")
 
 # Minimum required Speect Engine version
 set(major_min 1)
@@ -29,7 +31,8 @@ set(minor_min 0)
 
 speect_plugin_configure_info(${description} ${major_min} ${minor_min})
 
-add_subdirectory(cfstlookup)
+speect_plugin_include_dirs(${CFSTLOOKUP_INCLUDE_DIRS})
+
 
 #------------------------------------------------------------------------------------#
 #                               Source files                                         #
@@ -50,7 +53,8 @@ include(lexicon)
 #                            Plug-in shared object                                   #
 #------------------------------------------------------------------------------------#
 
-speect_plugin_create()
+speect_plugin_create(${CFSTLOOKUP_LIBRARIES})
+
 
 
 #------------------------------------------------------------------------------------#
@@ -58,7 +62,7 @@ speect_plugin_create()
 #------------------------------------------------------------------------------------#
 
 if(WANT_EXAMPLES)
-  add_subdirectory(examples)
+#  add_subdirectory(examples)
 endif(WANT_EXAMPLES)
 
 
@@ -68,6 +72,6 @@ endif(WANT_EXAMPLES)
 
 # Speect SWIG interface
 if(NOT NO_SWIG)
-  add_subdirectory(swig)
+#  add_subdirectory(swig)
 endif(NOT NO_SWIG)
 

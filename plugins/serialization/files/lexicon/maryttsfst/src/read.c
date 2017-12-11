@@ -28,7 +28,7 @@
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* Read a lexicon from a JSON format file.                                          */
+/* Read a lexicon from a MaryTTS FST format file.                                   */
 /*                                                                                  */
 /*                                                                                  */
 /************************************************************************************/
@@ -41,6 +41,8 @@
 /************************************************************************************/
 
 #include "serialized_lex.h"
+#include "cfstlookup/cfstlookup.h"
+#include "stdio.h"
 
 
 /************************************************************************************/
@@ -49,8 +51,7 @@
 /*                                                                                  */
 /************************************************************************************/
 
-static void set_lex_info(SLexicon *lex, const SMap *lexDef, s_erc *error);
-
+S_LOCAL SLexiconMaryttsFST *s_read_lexicon_marytts(const char *path, s_erc *error);
 
 /************************************************************************************/
 /*                                                                                  */
@@ -58,151 +59,149 @@ static void set_lex_info(SLexicon *lex, const SMap *lexDef, s_erc *error);
 /*                                                                                  */
 /************************************************************************************/
 
-S_LOCAL SLexiconmaryttsfst *s_read_lexicon_maryttsfst(const char *path, s_erc *error)
-{
-	SLexiconmaryttsfst *lex = NULL;
-	SMap *parsedFile = NULL;
-	const SMap *tmpMap;
-	const SObject *tmp;
-	s_bool is_present;
-	size_t entries_size;
+struct _search_logger {
+	int count;
+	const char* original_string;
+};
 
+static int _print_results(const char* buffer, size_t buffer_length, void* data) {
+	struct _search_logger* logger = (struct _search_logger*) data;
+	fprintf(stdout, "string \"%s\" found: ", logger->original_string);
+	fwrite(buffer, 1, buffer_length, stdout);
+	fputc('\n', stdout);
+	logger->count++;
+	return 0;
+}
+
+S_LOCAL SLexiconMaryttsFST *s_read_lexicon_maryttsfst(const char *path, s_erc *error)
+{
+	SLexiconMaryttsFST *lex = NULL;
+	//SMap *parsedFile = NULL;
+	//const SMap *tmpMap;
+	//const SObject *tmp;
+	//s_bool is_present;
+	//size_t entries_size;
+	FILE* fp = NULL;
 
 	S_CLR_ERR(error);
 
 	/* create lexicon */
-	lex = S_NEW(SLexiconmaryttsfst, error);
+	lex = S_NEW(SLexiconMaryttsFST, error);
 	if (S_CHK_ERR(error, S_CONTERR,
 				  "s_read_lexicon_maryttsfst",
 				  "Failed to create new lexicon object"))
 		goto quit_error;
 
 	/* read the JSON file into a SMAP */
-	parsedFile = s_json_parse_config_file(path, error);
+	/*parsedFile = s_json_parse_config_file(path, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
-				  "Call to \"s_maryttsfst_json_config_file\" failed"))
-		goto quit_error;
+				  "s_read_lexicon_json",
+				  "Call to \"s_json_parse_config_file\" failed"))
+		goto quit_error;*/
 
 	/* get "lexicon-definition" key */
-	tmp = SMapGetObjectDef(parsedFile, "lexicon-definition", NULL, error);
+/*	tmp = SMapGetObjectDef(parsedFile, "lexicon-definition", NULL, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Call to \"SMapGetObjectDef\" failed"))
 		goto quit_error;
-
-	if (tmp == NULL)
+*/
+/*	if (tmp == NULL)
 	{
 		S_CTX_ERR(error, S_FAILURE,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Lexicon file does not have a 'lexicon-definition' key");
 		goto quit_error;
 	}
-
+*/
 	/* cast to make sure it's a map */
-	tmpMap = S_CAST(tmp, SMap, error);
+/*	tmpMap = S_CAST(tmp, SMap, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Lexicon file key 'lexicon-definition' must be a map type"))
-		goto quit_error;
+		goto quit_error;*/
 
-	set_lex_info(S_LEXICON(lex), tmpMap, error);
+	/*set_lex_info(S_LEXICON(lex), tmpMap, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Call to \"set_lex_info\" failed"))
-		goto quit_error;
+		goto quit_error;*/
 
 	/* get lexicon features, if any */
-	is_present = SMapObjectPresent(parsedFile, "features", error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
-				  "Call to \"SMapObjectIsPresent\" failed"))
-		goto quit_error;
-
-	if (is_present)
-	{
-		SObject *featuresObject;
-		SMap *featuresMap;
 
 
-		featuresObject = SMapObjectUnlink(parsedFile, "features", error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "s_read_lexicon_maryttsfst",
-					  "Call to \"SMapObjectUnlink\" failed"))
+	/*if the path is valid open the file*/
+	fp = fopen(path, "rb");
+
+	fprintf(stderr, "%s\n", path);
+	if (fp != NULL){
+		cfstlookup_fst_t temp = {0};
+		int err = 0;
+		temp = cfstlookup_read_fst_t(fp, &err);
+		if (err)
 			goto quit_error;
-
-		/* cast to make sure it's a map */
-		featuresMap = S_CAST(featuresObject, SMap, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "s_read_lexicon_maryttsfst",
-					  "Lexicon file key 'features' must be a map type"))
-		{
-			S_DELETE(featuresObject, "s_read_lexicon_maryttsfst", error);
-			goto quit_error;
-		}
-
-		/* give the features map to the lexicon */
-		S_LEXICON(lex)->features = featuresMap;
+		lex->dictionary = &temp;
+		fprintf(stderr, "%s\n", "dentro if");
 	}
 
 	/* get lexicon entries */
-	tmp = SMapGetObjectDef(parsedFile, "lexicon-entries", NULL, error);
+	/*tmp = SMapGetObjectDef(parsedFile, "lexicon-entries", NULL, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Call to \"SMapGetObjectDef\" failed"))
 		goto quit_error;
 
 	if (tmp == NULL)
 	{
 		S_CTX_ERR(error, S_FAILURE,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Lexicon file does not have a 'lexicon-entries' key");
 		goto quit_error;
 	}
-
+*/
 	/* cast to make sure it's a map */
-	tmpMap = S_CAST(tmp, SMap, error);
+	/*tmpMap = S_CAST(tmp, SMap, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Lexicon file key 'lexicon-entries' must be a map type"))
 		goto quit_error;
-
+*/
 	/* get the size of the map */
-	entries_size = SMapSize(tmpMap, error);
+/*	entries_size = SMapSize(tmpMap, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Call to \"SMapSize\" failed"))
 		goto quit_error;
-
+*/
 	/* the entries map is a SMapList (default for JSON reader), we
 	 * want a SMapHashTable. Create a new one with the given size.
 	 */
-	lex->entries = S_MAP(S_NEW(SMapHashTable, error));
+/*	lex->entries = S_MAP(S_NEW(SMapHashTable, error));
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Failed to create new 'SMapHashTable' object"))
-		goto quit_error;
+		goto quit_error;*/
 
 	/* initialize with the read size */
-	SMapHashTableResize(S_MAPHASHTABLE(lex->entries), entries_size,
+/*	SMapHashTableResize(S_MAPHASHTABLE(lex->entries), entries_size,
 						error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Call to \"SMapHashTableResize\" failed"))
 	{
-		S_DELETE(lex->entries, "s_read_lexicon_maryttsfst", error);
+		S_DELETE(lex->entries, "s_read_lexicon_json", error);
 		goto quit_error;
 	}
-
+*/
 	/* copy the entries from the read JSON to the lexicon (from
 	 * SMapList to SMapHashTable)
 	 */
-	SMapCopy(lex->entries, tmpMap, error);
+/*	SMapCopy(lex->entries, tmpMap, error);
 	if (S_CHK_ERR(error, S_CONTERR,
-				  "s_read_lexicon_maryttsfst",
+				  "s_read_lexicon_json",
 				  "Call to \"SMapCopy\" failed"))
 		goto quit_error;
-
+*/
 	/* done */
 	goto quit;
 
@@ -210,145 +209,17 @@ S_LOCAL SLexiconmaryttsfst *s_read_lexicon_maryttsfst(const char *path, s_erc *e
 	/* errors start clean up code here */
 quit_error:
 	if (lex != NULL)
+		//TODO distruggere dictionary
 		S_DELETE(lex, "s_read_lexicon_maryttsfst", error);  /* sets lex = NULL */
 
 	/* normal exit start clean up code here */
 quit:
-	if (parsedFile != NULL)
-		S_DELETE(parsedFile, "s_read_lexicon_maryttsfst", error);
+	if (fp!=NULL){
+		fclose(fp);
+		fp=NULL;
+	}
+	/*if (parsedFile != NULL)
+		S_DELETE(parsedFile, "s_read_lexicon_marytts", error);*/
 
 	return lex;
-}
-
-/************************************************************************************/
-/*                                                                                  */
-/* Static function implementations                                                  */
-/*                                                                                  */
-/************************************************************************************/
-
-static void set_lex_info(SLexicon *lex, const SMap *lexDef, s_erc *error)
-{
-	const SObject *tmpObject;
-	const char *tmp_string;
-	const SMap *versionMap;
-
-
-	S_CLR_ERR(error);
-
-	/* get lexicon name */
-	tmp_string = SMapGetStringDef(lexDef, "name", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetStringDef\" failed"))
-		return;
-
-	if (tmp_string == NULL)
-	{
-		S_CTX_ERR(error, S_FAILURE,
-				  "set_lex_info",
-				  "'lexicon-definition' does not have a 'name' key");
-		return;
-	}
-
-	lex->info->name = s_strdup(tmp_string, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"s_strdup\" failed"))
-		return;
-
-	/* get lexicon description */
-	tmp_string = SMapGetStringDef(lexDef, "description", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetStringDef\" failed"))
-		return;
-
-	if (tmp_string == NULL)
-	{
-		S_CTX_ERR(error, S_FAILURE,
-				  "set_lex_info",
-				  "'lexicon-definition' does not have a 'description' key");
-		return;
-	}
-
-	lex->info->description = s_strdup(tmp_string, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"s_strdup\" failed"))
-		return;
-
-	/* get lexicon language */
-	tmp_string = SMapGetStringDef(lexDef, "language", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetStringDef\" failed"))
-		return;
-
-	if (tmp_string == NULL)
-	{
-		S_CTX_ERR(error, S_FAILURE,
-				  "set_lex_info",
-				  "'lexicon-definition' does not have a 'language' key");
-		return;
-	}
-
-	lex->info->language = s_strdup(tmp_string, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"s_strdup\" failed"))
-		return;
-
-	/* get lexicon lang_code */
-	tmp_string = SMapGetStringDef(lexDef, "lang-code", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetStringDef\" failed"))
-		return;
-
-	if (tmp_string == NULL)
-	{
-		S_CTX_ERR(error, S_FAILURE,
-				  "set_lex_info",
-				  "'lexicon-definition' does not have a 'lang_code' key");
-		return;
-	}
-
-	lex->info->lang_code = s_strdup(tmp_string, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"s_strdup\" failed"))
-		return;
-
-	/* get lexicon version */
-	tmpObject = SMapGetObjectDef(lexDef, "version", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetStringDef\" failed"))
-		return;
-
-	if (tmpObject == NULL)
-	{
-		S_CTX_ERR(error, S_FAILURE,
-				  "set_lex_info",
-				  "'lexicon-definition' does not have a 'version' key");
-		return;
-	}
-
-	versionMap = S_CAST(tmpObject, SMap, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "'lexicon-definition' key 'version' must be a map type"))
-		return;
-
-	lex->info->version.major = SMapGetInt(versionMap, "major", error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetInt\" failed"))
-		return;
-
-	lex->info->version.minor = SMapGetInt(versionMap, "minor", error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "set_lex_info",
-				  "Call to \"SMapGetInt\" failed"))
-		return;
 }

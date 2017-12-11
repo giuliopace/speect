@@ -1,5 +1,5 @@
 /************************************************************************************/
-/* Copyright (c) 2009-2011 The Department of Arts and Culture,                      */
+/* Copyright (c) 2010-2011 The Department of Arts and Culture,                      */
 /* The Government of the Republic of South Africa.                                  */
 /*                                                                                  */
 /* Contributors:  Meraka Institute, CSIR, South Africa.                             */
@@ -24,43 +24,46 @@
 /************************************************************************************/
 /*                                                                                  */
 /* AUTHOR  : Aby Louw                                                               */
-/* DATE    : December 2009                                                          */
+/* DATE    : June 2010                                                              */
 /*                                                                                  */
 /************************************************************************************/
 /*                                                                                  */
-/* C convenience functions for SLexiconcfstlookup Python wrapper.                   */
+/* SWIG common C convenience functions for SLexiconJSON.                            */
 /*                                                                                  */
 /*                                                                                  */
-/*                                                                                  */
-/************************************************************************************/
-
-
-/************************************************************************************/
-/*                                                                                  */
-/* Extend the SLexicon class                                                        */
 /*                                                                                  */
 /************************************************************************************/
 
-%pythoncode
+
+/************************************************************************************/
+/*                                                                                  */
+/* Inline helper functions                                                          */
+/*                                                                                  */
+/************************************************************************************/
+
+%inline
 %{
-from . import lexicon
+	SLexicon *_lexicon_json_load(const char *path, s_erc *error)
+	{
+		SObject *loadedLexicon;
 
-def load_lexicon_fst(path):
-    """
-    Load the fst format lexicon at the given file path.
 
-    :param path: The full path and filename of the fst
-                 format lexicon to load.
-    :type path: string
-    :return: The loaded lexicon at the given path.
-    :rtype: ``SLexicon``
-    """
-    if not isinstance(path, str):
-        raise TypeError("Argument \"path\" must be a string")
+		S_CLR_ERR(error);
+		if (path == NULL)
+		{
+			S_CTX_ERR(error, S_ARGERROR,
+					  "_lexicon_json_load",
+					  "Argument \"path\" is NULL");
+			return NULL;
+		}
 
-    return _lexicon_fst_load(path)
+		loadedLexicon = SObjectLoad(path, "spct_lexicon", error);
+		if (S_CHK_ERR(error, S_CONTERR,
+					  "_lexicon_json_load",
+					  "Call to \"SObjectLoad\" failed"))
+			return NULL;
 
-setattr(lexicon.SLexicon, "load_fst", staticmethod(load_lexicon_fst))
+		return S_LEXICON(loadedLexicon);
+	}
 %}
-
 

@@ -29,7 +29,7 @@
 /************************************************************************************/
 /*                                                                                  */
 /* A lexicon class implementation with the lexicon entries in a SMap                */
-/* structure read from a JSON format file. Inherits from SLexicon.                  */
+/* structure read from a MaryTTS FST format file. Inherits from SLexicon.           */
 /*                                                                                  */
 /*                                                                                  */
 /************************************************************************************/
@@ -42,6 +42,7 @@
 /************************************************************************************/
 
 #include "lexicon_maryttsfst.h"
+#include "cfstlookup/cfstlookup.h"
 #include "stdio.h"
 
 /************************************************************************************/
@@ -50,7 +51,7 @@
 /*                                                                                  */
 /************************************************************************************/
 
-static SLexiconmaryttsfstClass LexiconmaryttsfstClass; /* SLexiconmaryttsfst class declaration. */
+static SLexiconMaryttsFSTClass LexiconMaryttsFSTClass; /* SLexiconMaryttsFST class declaration. */
 
 
 /************************************************************************************/
@@ -59,14 +60,14 @@ static SLexiconmaryttsfstClass LexiconmaryttsfstClass; /* SLexiconmaryttsfst cla
 /*                                                                                  */
 /************************************************************************************/
 
-const SList *get_matched_word_info(const SMap *singleEntry, s_bool *syllabified,
+/*const SList *get_matched_word_info(const SMap *singleEntry, s_bool *syllabified,
 								   s_erc *error);
 
 static const SList *get_word_info(const SObject *wordEntries, const SMap *features,
 								  s_bool *syllabified, s_erc *error);
 
 static s_bool check_if_match(const SMap *singleEntry, const SMap *features,
-							 s_erc *error);
+							 s_erc *error);*/
 
 
 /************************************************************************************/
@@ -80,20 +81,20 @@ static s_bool check_if_match(const SMap *singleEntry, const SMap *features,
 S_LOCAL void _s_lexicon_maryttsfst_class_reg(s_erc *error)
 {
 	S_CLR_ERR(error);
-	s_class_reg(S_OBJECTCLASS(&LexiconmaryttsfstClass), error);
+	s_class_reg(S_OBJECTCLASS(&LexiconMaryttsFSTClass), error);
 	S_CHK_ERR(error, S_CONTERR,
 			  "_s_lexicon_maryttsfst_class_reg",
-			  "Failed to register SLexiconmaryttsfstClass");
+			  "Failed to register SLexiconMaryttsFSTClass");
 }
 
 
 S_LOCAL void _s_lexicon_maryttsfst_class_free(s_erc *error)
 {
 	S_CLR_ERR(error);
-	s_class_free(S_OBJECTCLASS(&LexiconmaryttsfstClass), error);
+	s_class_free(S_OBJECTCLASS(&LexiconMaryttsFSTClass), error);
 	S_CHK_ERR(error, S_CONTERR,
 			  "_s_lexicon_maryttsfst_class_free",
-			  "Failed to free SLexiconmaryttsfstClass");
+			  "Failed to free SLexiconMaryttsFSTClass");
 }
 
 /************************************************************************************/
@@ -102,226 +103,7 @@ S_LOCAL void _s_lexicon_maryttsfst_class_free(s_erc *error)
 /*                                                                                  */
 /************************************************************************************/
 
-static s_bool check_if_match(const SMap *singleEntry, const SMap *features, s_erc *error)
-{
-	SIterator *itr;
 
-
-	S_CLR_ERR(error);
-
-	itr = S_ITERATOR_GET(features, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "check_if_match",
-				  "Call to \"S_ITERATOR_GET\" failed"))
-		return FALSE;
-
-	for (/* NOP */; itr != NULL; itr = SIteratorNext(itr))
-	{
-		const SObject *entryObject;
-		const SObject *featuresObject;
-		const char *key;
-		s_bool match;
-
-
-		key = SIteratorKey(itr, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "check_if_match",
-					  "Call to \"SIteratorKey\" failed"))
-		{
-			S_DELETE(itr, "check_if_match", error);
-			return FALSE;
-		}
-
-
-		featuresObject = SIteratorObject(itr, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "check_if_match",
-					  "Call to \"SIteratorObject\" failed"))
-		{
-			S_DELETE(itr, "check_if_match", error);
-			return FALSE;
-		}
-
-		/* object must be present */
-		entryObject = SMapGetObjectDef(singleEntry, key, NULL, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "check_if_match",
-					  "Call to \"SMapGetObjectDef\" failed"))
-		{
-			S_DELETE(itr, "check_if_match", error);
-			return FALSE;
-		}
-
-		if (entryObject == NULL)
-		{
-			S_DELETE(itr, "check_if_match", error);
-			return FALSE;
-		}
-
-		match = SObjectCompare(featuresObject, entryObject, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "check_if_match",
-					  "Call to \"SObjectCompare\" failed"))
-		{
-			S_DELETE(itr, "check_if_match", error);
-			return FALSE;
-		}
-
-		if (!match)
-		{
-			S_DELETE(itr, "check_if_match", error);
-			return FALSE;
-		}
-
-		/* continue if this one matched */
-	}
-
-	/* if we get here then they matched */
-	return TRUE;
-}
-
-
-const SList *get_matched_word_info(const SMap *singleEntry, s_bool *syllabified,
-								   s_erc *error)
-{
-	fprintf(stderr, "%s\n", "QUI");
-	const SObject *wordInfoObject;
-	const SList *wordInfo;
-
-
-	S_CLR_ERR(error);
-
-	/* try to get syllables */
-	wordInfoObject = SMapGetObjectDef(singleEntry, "syllables", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "get_matched_word_info",
-				  "Call to \"SMapGetObjectDef\" failed"))
-		return NULL;
-
-	if (wordInfoObject != NULL)
-	{
-		/* make sure it's a list */
-		wordInfo = S_CAST(wordInfoObject, SList, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "get_matched_word_info",
-					  "'syllables' entry for word is not a list"))
-			return NULL;
-
-		*syllabified = TRUE;
-		return wordInfo;
-	}
-
-	/* no syllables, try to get phones */
-	wordInfoObject = SMapGetObjectDef(singleEntry, "phones", NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "get_matched_word_info",
-				  "Call to \"SMapGetObjectDef\" failed"))
-		return NULL;
-
-	if (wordInfoObject != NULL)
-	{
-		/* make sure it's a list */
-		wordInfo = S_CAST(wordInfoObject, SList, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "get_matched_word_info",
-					  "'phones' entry for word is not a list"))
-			return NULL;
-
-		*syllabified = FALSE;
-		return wordInfo;
-	}
-
-	/* the word must have either phones or syllables */
-	S_CTX_ERR(error, S_FAILURE,
-			  "get_matched_word_info",
-			  "Word entry does not have 'phones' or 'syllables' defined");
-	return NULL;
-}
-
-
-static const SList *get_word_info(const SObject *wordEntries, const SMap *features,
-								  s_bool *syllabified, s_erc *error)
-{
-	const SList *wordEntryList;
-	SIterator *itr;
-	s_bool matches;
-	const SList *wordInfo;
-	const SObject *singleEntryObject;
-	const SMap *singleEntryMap = NULL;
-
-
-	S_CLR_ERR(error);
-	/* make sure that wordEntries is a list */
-	wordEntryList = S_CAST(wordEntries, SList, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "get_word_info",
-				  "Retrieved lexicon entry for word is not a list object"))
-		return NULL;
-
-	itr = S_ITERATOR_GET(wordEntryList, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "get_word_info",
-				  "Call to \"S_ITERATOR_GET\" failed"))
-		return NULL;
-
-	for (/* NOP */; itr != NULL; itr = SIteratorNext(itr))
-	{
-		singleEntryObject = SIteratorObject(itr, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "get_word_info",
-					  "Call to \"SIteratorObject\" failed"))
-		{
-			S_DELETE(itr, "get_word_info", error);
-			return NULL;
-		}
-
-		/* make sure singleEntryObject is a map */
-		singleEntryMap = S_CAST(singleEntryObject, SMap, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "get_word_info",
-					  "Word information must be a map"))
-		{
-			S_DELETE(itr, "get_word_info", error);
-			return NULL;
-		}
-
-		if (features == NULL)
-			goto found_match; /* we take the first entry */
-
-		/* return first entry that matches the given features */
-		matches = check_if_match(singleEntryMap, features, error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "get_word_info",
-					  "Call to \"check_if_match\" failed"))
-		{
-			S_DELETE(itr, "get_word_info", error);
-			return NULL;
-		}
-
-		if (!matches)
-			continue;
-		else
-			goto found_match;
-	}
-
-found_match:
-	if (itr != NULL)
-	{
-		S_DELETE(itr, "get_word_info", error);
-		if (S_CHK_ERR(error, S_CONTERR,
-					  "get_word_info",
-					  "Failed to delete iterator"))
-			return NULL;
-	}
-
-	wordInfo = get_matched_word_info(singleEntryMap, syllabified, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "get_word_info",
-				  "Call to \"get_matched_word_info\" failed"))
-		return NULL;
-
-	return wordInfo;
-}
 
 
 /************************************************************************************/
@@ -332,23 +114,25 @@ found_match:
 
 static void Init(void *obj, s_erc *error)
 {
-	SLexiconmaryttsfst *self = obj;
+	SLexiconMaryttsFST *self = obj;
 
 
 	S_CLR_ERR(error);
-	self->entries = NULL;
+	self->dictionary = NULL;
 }
 
 
 
 static void Destroy(void *obj, s_erc *error)
 {
-	SLexiconmaryttsfst *self = obj;
+	SLexiconMaryttsFST *self = obj;
 
 
 	S_CLR_ERR(error);
-	if (self->entries != NULL)
-		S_DELETE(self->entries, "Destroy", error);
+	if (self->dictionary != NULL) {
+		cfstlookup_fst_t_cleanup(self->dictionary);
+		self->dictionary = NULL;
+	}
 }
 
 
@@ -445,16 +229,46 @@ static const SObject *GetFeature(const SLexicon *self, const char *key,
 	return feature;
 }
 
+struct _search_logger {
+	int count;
+	const char* original_string;
+	SList *results;
+	s_bool is_first_call;
+	s_erc *error;
+};
+
+static int _results_list_filler(const char* buffer, size_t buffer_length, void* data) {
+	fprintf(stderr, "%s\n", "3");
+
+	(void)(buffer_length);
+	struct _search_logger* logger = (struct _search_logger*) data;
+
+	fprintf(stderr, "%s\n", "3");
+	if (logger->is_first_call==TRUE) {
+
+		SObject *tmp = SObjectSetString(buffer, logger->error);
+
+		fprintf(stderr, "%s\n", "g");
+		SListAppend(logger->results, tmp, logger->error);
+
+	    fprintf(stderr, "%s\n", "4");
+
+		logger->count++;
+		logger->is_first_call=FALSE;
+		return 0;
+	}
+	else{
+		return 1;
+	}
+}
 
 static SList *GetWord(const SLexicon *self, const char *word,
 					  const SMap *features, s_bool *syllabified,
 					  s_erc *error)
 {
-	const SList *list;
-	SList *listCopy;
-	const SObject *wordEntries;
-	const SLexiconmaryttsfst *lex = S_LEXICON_MARYTTSFST(self);
-
+	SList *results = NULL;
+	const SLexiconMaryttsFST *lex = S_LEXICON_MARYTTSFST(self);
+	(void)(features);
 
 	S_CLR_ERR(error);
 	if (word == NULL)
@@ -473,33 +287,26 @@ static SList *GetWord(const SLexicon *self, const char *word,
 		return NULL;
 	}
 
-	if (lex->entries == NULL)
+	if (lex->dictionary == NULL)
 		return NULL;
 
-	/* get word entry, default NULL */
-	wordEntries = SMapGetObjectDef(lex->entries, word, NULL, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "GetWord",
-				  "Call to \"SMapGetObjectDef\" failed"))
-		return NULL;
+	char* buffer = NULL;
+	size_t buffer_len = 0;
+	size_t buffer_strlen = 0;
 
-	if (wordEntries == NULL)
-		return NULL; /* word not found */
+	fprintf(stderr, "%s\n", "1");
+	struct _search_logger data = {0, word, results, TRUE, error};
+	fprintf(stderr, "%s\n", word);
+	cfstlookup_dictionary_lookup(lex->dictionary, word, 0, 0, 0, &buffer, &buffer_strlen, &buffer_len, _results_list_filler, (void*)&data);
 
-	list = get_word_info(wordEntries, features, syllabified, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "GetWord",
-				  "Failed to get phones/syllables for word '%s'",
-				  word))
-		return NULL;
+	fprintf(stderr, "%s\n", "2");
+	if(buffer != NULL) {
+		free(buffer);
+	}
 
-	listCopy = SListCopy(NULL, list, error);
-	if (S_CHK_ERR(error, S_CONTERR,
-				  "GetWord",
-				  "Call to \"SListCopy\" failed"))
-		return NULL;
+	*syllabified=TRUE;
 
-	return listCopy;
+	return results;
 }
 
 
@@ -509,12 +316,12 @@ static SList *GetWord(const SLexicon *self, const char *word,
 /*                                                                                  */
 /************************************************************************************/
 
-static SLexiconmaryttsfstClass LexiconmaryttsfstClass =
+static SLexiconMaryttsFSTClass LexiconMaryttsFSTClass =
 {
 	/* SObjectClass */
 	{
-		"SLexicon:SLexiconmaryttsfst",
-		sizeof(SLexiconmaryttsfst),
+		"SLexicon:SLexiconMaryttsFST",
+		sizeof(SLexiconMaryttsFST),
 		{ 0, 1},
 		Init,            /* init    */
 		Destroy,         /* destroy */
